@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LogoutButton } from "./logout-button";
 
 export const metadata: Metadata = {
   title: "Admin — Instituto Linux",
@@ -18,6 +19,7 @@ export default function RootLayout({
             <a href="/" className="text-lg font-bold">
               Panel Admin — Instituto Linux
             </a>
+            <LogoutButton />
           </div>
         </header>
         <main className="max-w-5xl mx-auto px-6 py-8">{children}</main>
