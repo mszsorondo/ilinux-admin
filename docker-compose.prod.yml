@@ -1,0 +1,25 @@
+services:
+  app:
+    build: ./ilinux
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://campus_user:awIt7%5B%3BSMGeIk7@host.docker.internal:5432/campus_il_db
+      JWT_SECRET: ${JWT_SECRET}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      NEXT_PUBLIC_BASE_URL: https://campus.institutolinux.com
+      RESEND_API_KEY: ${RESEND_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  admin:
+    build: ./ilinux-admin
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgres://campus_user:awIt7%5B%3BSMGeIk7@host.docker.internal:5432/campus_il_db
+      JWT_SECRET: ${ADMIN_JWT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
