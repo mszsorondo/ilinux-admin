@@ -65,7 +65,11 @@ export async function PUT(
 
     if ("video_url" in body) {
       updates.push(`video_url = $${paramIdx++}`);
-      values.push(body.video_url || null);
+      let url = body.video_url || null;
+      if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      values.push(url);
     }
     if ("markdown" in body) {
       updates.push(`markdown = $${paramIdx++}`);
@@ -73,7 +77,11 @@ export async function PUT(
     }
     if ("meeting_url" in body) {
       updates.push(`meeting_url = $${paramIdx++}`);
-      values.push(body.meeting_url || null);
+      let url = body.meeting_url || null;
+      if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      values.push(url);
     }
 
     if (updates.length === 0) {
