@@ -3,18 +3,25 @@ import { getDb } from "@/lib/db";
 import { intentarAvanzarClaseActual } from "@/lib/clase-actual";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
     const { numero } = await params;
     const num = parseInt(numero, 10);
     if (isNaN(num) || num < 1 || num > 24) {
-      return NextResponse.json({ error: "Número inválido" }, { status: 400 });
+      return NextResponse.json({ error: "Numero invalido" }, { status: 400 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const profesorId = searchParams.get('profesorId');
+
+    if (!profesorId) {
+      return NextResponse.json({ error: "profesorId es requerido" }, { status: 400 });
     }
 
     const sql = getDb();
-    const cursoRows = await sql`SELECT id, clase_actual FROM curso LIMIT 1`;
+    const cursoRows = await sql`SELECT id, clase_actual FROM curso WHERE profesor_id = ${profesorId}`;
     if (cursoRows.length === 0) {
       return NextResponse.json({ error: "Curso no encontrado" }, { status: 404 });
     }
@@ -46,13 +53,19 @@ export async function PUT(
     const { numero } = await params;
     const num = parseInt(numero, 10);
     if (isNaN(num) || num < 1 || num > 24) {
-      return NextResponse.json({ error: "Número inválido" }, { status: 400 });
+      return NextResponse.json({ error: "Numero invalido" }, { status: 400 });
     }
 
     const body = await request.json();
+    const { profesorId } = body;
+
+    if (!profesorId) {
+      return NextResponse.json({ error: "profesorId es requerido" }, { status: 400 });
+    }
+
     const sql = getDb();
 
-    const cursoRows = await sql`SELECT id FROM curso LIMIT 1`;
+    const cursoRows = await sql`SELECT id FROM curso WHERE profesor_id = ${profesorId}`;
     if (cursoRows.length === 0) {
       return NextResponse.json({ error: "Curso no encontrado" }, { status: 404 });
     }
@@ -109,11 +122,11 @@ export async function PUT(
 
     // Condition A: if class now has both video+markdown, try to advance
     if (clase.video_url && clase.markdown) {
-      await intentarAvanzarClaseActual(num);
+      await intentarAvanzarClaseActual(num, cursoId);
     }
 
     // Get updated clase_actual
-    const cursoAfter = await sql`SELECT clase_actual FROM curso LIMIT 1`;
+    const cursoAfter = await sql`SELECT clase_actual FROM curso WHERE profesor_id = ${profesorId}`;
 
     return NextResponse.json({
       clase,

@@ -1,11 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const profesorId = searchParams.get('profesorId');
+
+    if (!profesorId) {
+      return NextResponse.json({ error: "profesorId es requerido" }, { status: 400 });
+    }
+
     const sql = getDb();
 
-    const cursoRows = await sql`SELECT id, clase_actual, finalizado FROM curso LIMIT 1`;
+    const cursoRows = await sql`SELECT id, clase_actual, finalizado FROM curso WHERE profesor_id = ${profesorId}`;
     if (cursoRows.length === 0) {
       return NextResponse.json({ error: "Curso no encontrado" }, { status: 404 });
     }

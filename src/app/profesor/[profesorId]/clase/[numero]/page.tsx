@@ -16,6 +16,7 @@ interface ClaseData {
 export default function ClaseEditorPage() {
   const params = useParams();
   const router = useRouter();
+  const profesorId = params.profesorId as string;
   const numero = params.numero as string;
 
   const [clase, setClase] = useState<ClaseData | null>(null);
@@ -30,7 +31,7 @@ export default function ClaseEditorPage() {
   const [meetingUrl, setMeetingUrl] = useState("");
 
   useEffect(() => {
-    fetch(`/api/clase/${numero}`)
+    fetch(`/api/clase/${numero}?profesorId=${profesorId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.clase) {
@@ -42,7 +43,7 @@ export default function ClaseEditorPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, [numero]);
+  }, [numero, profesorId]);
 
   async function handleSave() {
     setSaving(true);
@@ -55,6 +56,7 @@ export default function ClaseEditorPage() {
           video_url: videoUrl,
           markdown: markdown,
           meeting_url: meetingUrl,
+          profesorId,
         }),
       });
       const data = await res.json();
@@ -66,7 +68,7 @@ export default function ClaseEditorPage() {
       setClaseActual(data.clase_actual);
       setMessage({ type: "ok", text: "Cambios guardados" });
     } catch {
-      setMessage({ type: "error", text: "Error de conexión" });
+      setMessage({ type: "error", text: "Error de conexion" });
     } finally {
       setSaving(false);
     }
@@ -80,7 +82,7 @@ export default function ClaseEditorPage() {
       const res = await fetch("/api/clase-actual", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero: parseInt(numero, 10) }),
+        body: JSON.stringify({ numero: parseInt(numero, 10), profesorId }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -91,7 +93,7 @@ export default function ClaseEditorPage() {
       setClase((prev) => prev ? { ...prev, completada: true } : prev);
       setMessage({ type: "ok", text: "Clase marcada como completada" });
     } catch {
-      setMessage({ type: "error", text: "Error de conexión" });
+      setMessage({ type: "error", text: "Error de conexion" });
     } finally {
       setMarking(false);
     }
@@ -109,7 +111,7 @@ export default function ClaseEditorPage() {
 
   return (
     <div>
-      <Link href="/" className="text-sm text-[#1E3A8A] hover:text-[#F5A623] mb-4 inline-block">
+      <Link href={`/profesor/${profesorId}`} className="text-sm text-[#1E3A8A] hover:text-[#F5A623] mb-4 inline-block">
         &larr; Volver al dashboard
       </Link>
 
@@ -163,14 +165,14 @@ export default function ClaseEditorPage() {
             value={markdown}
             onChange={(e) => setMarkdown(e.target.value)}
             rows={16}
-            placeholder="# Título de la clase&#10;&#10;Contenido en Markdown..."
+            placeholder="# Titulo de la clase&#10;&#10;Contenido en Markdown..."
             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:border-[#1E3A8A] focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Link de reunión virtual
+            Link de reunion virtual
           </label>
           <input
             type="url"
